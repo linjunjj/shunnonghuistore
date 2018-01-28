@@ -1,4 +1,7 @@
 <style lang="less">
+  @import "./styles/base";
+  @import "./styles/icon";
+  @import "./styles/style";
 .container {
   height: 100%;
   display: flex;
@@ -12,6 +15,17 @@
 <script>
 import wepy from 'wepy'
 import 'wepy-async-function'
+import {
+  USER_SPECICAL_INFO,
+  USER_INFO,
+  SYSTEM_INFO,
+  ADDRESS_ID,
+  SEL_CLASS_CODE
+} from "./utils/constant";
+import {
+  wxJsCode2Session,
+  user2session
+} from './api/api';
 
 export default class extends wepy.app {
   config = {
@@ -19,26 +33,133 @@ export default class extends wepy.app {
       'pages/index'
     ],
     window: {
-      backgroundTextStyle: 'light',
-      navigationBarBackgroundColor: '#fff',
+      backgroundTextStyle: 'dark',
+      navigationBarBackgroundColor: '#FFFFFF',
       navigationBarTitleText: 'WeChat',
-      navigationBarTextStyle: 'black'
+      navigationBarTextStyle: 'black',
+      enablePullDownRefresh: false,
+      backgroundColor: '#EFEFEF'
+    },
+    "tabBar": {
+      "color": "#999999",
+      "selectedColor": "#ff6a3c",
+      "backgroundColor": "#ffffff",
+      "borderStyle": "black",
+      "list": [{
+        "pagePath": "pages/index",
+        "text": "首页",
+        "iconPath": "images/icon_home.png",
+        "selectedIconPath": "images/icon_home_active.png"
+      }, {
+        "pagePath": "pages/index",
+        "text": "分类",
+        "iconPath": "images/index.png",
+        "selectedIconPath": "images/icon_classify_active.png"
+      }, {
+        "pagePath": "pages/index",
+        "text": "购物车",
+        "iconPath": "images/icon_shop_cart.png",
+        "selectedIconPath": "images/icon_shop_cart_active.png"
+      }, {
+        "pagePath": "pages/index",
+        "text": "我",
+        "iconPath": "images/icon_info.png",
+        "selectedIconPath": "images/icon_info_active.png"
+      }]
     }
   }
 
   globalData = {
-    userInfo: null
+    userInfo: null,
+    appid:"",
+    secret:"",
   }
 
   constructor () {
     super()
     this.use('requestfix')
+    this.use('promisify');
   }
 
-  onLaunch() {
-    this.testAsync()
-  }
+  async onLaunch() {
 
+    let that = this;
+    //用户信息
+    let userSpecialInfo = wepy.getStorageSync(USER_SPECICAL_INFO) || {};
+    // 用户普通信息
+    let userInfo = wepy.getStorageSync(USER_INFO) || {};
+    //如果信息过期
+    if ((!userSpecialInfo.openid || (userSpecialInfo.expires_in || Date.now()) < (Date.now() + 600)) && (!userInfo.nickName)) {
+      let res = await wepy.login();
+      if (res.code) {
+        let d = that.globalData; //这里存储了appid、secret、token串    
+        //存储userInfo 
+        let c = await wepy.getUserInfo();
+        wepy.setStorageSync(USER_INFO, c.userInfo);
+
+        //存储系统信息 
+        let systemInfo = wepy.getSystemInfoSync();
+        wepy.setStorageSync(SYSTEM_INFO, systemInfo);
+        wxJsCode2Session({
+          query: {
+            jsCode: res.code,
+            nickName: c.userInfo.nickName
+          }
+        }).then(resp => {
+          var rlt = resp.data;
+          console.log("wxJsCode2Session..." + JSON.stringify(rlt));
+          if (rlt.result) {
+            var data = rlt.data;
+            if (data.openid) {
+              let obj = {};
+              obj.openid = data.openid;
+              obj.expires_in = Date.now() + data.expires_in;
+              //存储openid 
+              wepy.setStorageSync(USER_SPECICAL_INFO, obj);
+            }
+          } else {
+            let obj = {};
+            obj.openid = "oeuj50KHMqsh5kYZYWQJuwmY5yG0";
+            obj.expires_in = "7200";
+            //存储openid 
+            wepy.setStorageSync(USER_SPECICAL_INFO, obj);
+          }
+        });
+
+        let url = 'https://api.weixin.qq.com/sns/jscode2session?appid=' + d.appid + '&secret=' + d.secret + '&js_code=' + res.code + '&grant_type=authorization_code';
+
+        /* let b = await wepy.request({
+             url: url,
+             data: {},
+             method: 'POST',
+             header: {
+                 'content-Type': 'application/x-www-form-urlencoded'
+             }
+         });
+         if (b.data.openid) {
+             let obj = {};
+             obj.openid = b.data.openid;
+             obj.expires_in = Date.now() + b.data.expires_in;
+
+             //存储openid 
+             wepy.setStorageSync(USER_SPECICAL_INFO, obj);
+
+             //存储userInfo 
+             let c = await wepy.getUserInfo();
+             wepy.setStorageSync(USER_INFO, c.userInfo);
+
+             //存储系统信息 
+             let systemInfo = await wepy.getSystemInfoSync();
+             wepy.setStorageSync(SYSTEM_INFO, systemInfo);
+             console.log(b, '登陆成功')
+         }*/
+
+      } else {
+        console.log('获取用户登录态失败！' + res.errMsg)
+      }
+
+    }
+  }
   sleep (s) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
