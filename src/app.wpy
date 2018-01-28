@@ -74,15 +74,12 @@ export default class extends wepy.app {
     appid:"",
     secret:"",
   }
-
   constructor () {
     super()
     this.use('requestfix')
     this.use('promisify');
   }
-
   async onLaunch() {
-
     let that = this;
     //用户信息
     let userSpecialInfo = wepy.getStorageSync(USER_SPECICAL_INFO) || {};
@@ -125,7 +122,6 @@ export default class extends wepy.app {
             wepy.setStorageSync(USER_SPECICAL_INFO, obj);
           }
         });
-
         let url = 'https://api.weixin.qq.com/sns/jscode2session?appid=' + d.appid + '&secret=' + d.secret + '&js_code=' + res.code + '&grant_type=authorization_code';
 
         /* let b = await wepy.request({
