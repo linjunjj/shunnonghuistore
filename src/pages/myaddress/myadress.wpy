@@ -1,0 +1,157 @@
+<template>
+  <view class="container">
+    <view class="address-list">
+      <view class="a-address"  wx:for-items="{{addressList}}" wx:key="{{index}}">
+        <view class="left-text {{item.isDefault? 'active':''}}" bindtap="selectTap" data-id="{{item.id}}">
+          <view class="name-tel">
+            {{item.linkMan}}  {{item.mobile}}
+          </view>
+          <view class="address-box">
+            {{item.address}}
+          </view>
+        </view>
+        <view class="right-edit" bindtap="editAddess" data-id="{{item.id}}"></view>
+      </view>
+    </view>
+    <view class="bottom-box">
+      <view class="add-btn" bindtap="addAddess">新增收货地址</view>
+    </view>
+  </view>
+</template>
+
+<script>
+  export default  class  MyAddress extends  wepy.page{
+    config={
+      navigationBarTitleText:"我的地址"
+    }
+    data= {
+      addressList:[]
+    }
+    methods={
+      selectTap: function (e) {
+        var id = e.currentTarget.dataset.id;
+        wx.request({
+          url: 'https://api.it120.cc/'+ app.globalData.subDomain +'/user/shipping-address/update',
+          data: {
+            token:app.globalData.token,
+            id:id,
+            isDefault:'true'
+          },
+          success: (res) =>{
+            wx.navigateBack({})
+          }
+        })
+      },
+
+      addAddess : function () {
+        wx.navigateTo({
+          url:"/pages/address-add/index"
+        })
+      },
+
+      editAddess: function (e) {
+        wx.navigateTo({
+          url: "/pages/address-add/index?id=" + e.currentTarget.dataset.id
+        })
+      },
+    }
+    onLoad() {
+      console.log('onLoad')
+
+
+    };
+    onShow  () {
+      this.initShippingAddress();
+    };
+    initShippingAddress () {
+      var that = this;
+      wx.request({
+        url: 'https://api.it120.cc/'+ app.globalData.subDomain +'/user/shipping-address/list',
+        data: {
+          token:app.globalData.token
+        },
+        success: (res) =>{
+          if (res.data.code == 0) {
+            that.setData({
+              addressList:res.data.data
+            });
+          } else if (res.data.code == 700){
+            that.setData({
+              addressList: null
+            });
+          }
+        }
+      })
+    }
+
+  }
+
+
+</script>
+
+
+
+<style>
+  .container {
+    background-color:#F2f2f2;
+  }
+  .address-list{
+    width: 100%;
+    background-color: #fff;
+    margin-top: 20rpx;
+    padding-bottom: 100rpx;
+  }
+  .address-list .a-address{
+    width: 720rpx;
+    margin-left: 30rpx;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30rpx 0;
+    border-bottom: 1rpx solid #eee;
+  }
+  .a-address .left-text{
+    width: 610rpx;
+    box-sizing: border-box;
+    padding-left: 58rpx;
+  }
+  .a-address .left-text.active{
+    background: url(https://cdn.it120.cc/images/weappshop/addr-active.png) no-repeat left center;
+    background-size: 28rpx auto;
+  }
+  .a-address .left-text .name-tel{
+    margin-bottom: 20rpx;
+  }
+  .a-address .left-text .address-box{
+    font-size:24rpx;
+    color:#888888;
+    line-height:36rpx;
+  }
+  .a-address .right-edit{
+    width: 109rpx;
+    height: 100%;
+    padding: 50rpx 0 50rpx 58rpx;
+    box-sizing: border-box;
+    background: url(https://cdn.it120.cc/images/weappshop/addr-edit.png) no-repeat 43rpx center;
+    background-size: 35rpx auto;
+  }
+  .bottom-box{
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    font-size:28rpx;
+    color:#000000;
+    border-top: 1rpx solid #eee;
+    height:100rpx;
+    line-height: 100rpx;
+    background: #fff url(https://cdn.it120.cc/images/weappshop/arrow-right.png) no-repeat 705rpx center;
+    background-size: 15rpx auto;
+  }
+  .bottom-box .add-btn{
+    margin-left: 30rpx;
+    padding-left: 70rpx;
+    background: url(https://cdn.it120.cc/images/weappshop/add-addr.png) no-repeat left center;
+    background-size: 40rpx auto;
+  }
+
+</style>

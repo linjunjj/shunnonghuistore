@@ -22,9 +22,11 @@
   export default class extends wepy.app {
     config = {
       pages: [
+        // 'pages/sign/sign',
         // 'pages/start/start',
         'pages/home/home',
         'pages/me/me',
+        'pages/sign/sign'
       ],
       window: {
         backgroundTextStyle: 'dark',

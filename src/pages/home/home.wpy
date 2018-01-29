@@ -34,6 +34,17 @@
         <view class="nav_text">村村通</view>
       </navigator>
     </view>
+    <view wx:if="{{noticeList}}" class="notice">
+      <view class="notice_iteml">公告：</view>
+      <swiper wx:if="{{noticeList}}" class="notice_swiper" vertical="true" autoplay="true" circular="true" interval="3000">
+        <navigator wx:for-items="{{noticeList.dataList}}" wx:key="id" url="/pages/notice/show?id={{item.id}}" open-type="navigate">
+          <swiper-item >
+            <view class="notice_itemr">{{item.title}}</view>
+          </swiper-item>
+        </navigator>
+      </swiper>
+    </view>
+
     <!--发现好商品模块-->
     <!--<discover :list.sync="discoverList"></discover>-->
     <view class="recommend-title">商品推荐</view>
@@ -64,7 +75,15 @@
       bombscreen: Bombscreen
     }
     data = {
-
+        noticeList:[
+          {
+            "dateAdd": "2017-09-16 17:20:43",
+            "id": 161,
+            "isShow": true,
+            "title": "商城新开张，优惠多多，戳 戳 戳 我看详情。",
+            "userId": 951
+          }
+        ],
       imgUrls: [
         '../images/image_demo.png',
       ],
@@ -188,7 +207,6 @@
       }
     };
   }
-
 </script>
 <style lang="less">
   .swiper {
@@ -199,7 +217,42 @@
     width: 100%;
     height: 100%;
   }
-
+  .notice{
+    display: flex;
+    justify-content: space-between;
+    flex-wrap:wrap;
+    height: 80rpx;
+    line-height: 80rpx;
+    width: 750rpx;
+    margin-top: 10rpx;
+    background-color: #fff;
+  }
+  .notice_swiper{
+    padding-top: 15rpx;
+    padding-bottom: 15rpx;
+    height: 50rpx;
+    line-height: 50rpx;
+    width: 635rpx;
+  }
+  .notice_iteml {
+    padding-left: 25rpx;
+    padding-top: 15rpx;
+    padding-bottom: 15rpx;
+    font-size: 26rpx;
+    width: 80rpx;
+    height: 50rpx;
+    line-height: 50rpx;
+    color: #999;
+  }
+  .notice_itemr {
+    padding-left: 10rpx;
+    font-size: 26rpx;
+    overflow: hidden;
+    color: #e64340;
+    width: 635rpx;
+    height: 50rpx;
+    line-height: 50rpx;
+  }
   .pos {
     position: absolute;
     top: 0rpx;
