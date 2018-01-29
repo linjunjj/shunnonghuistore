@@ -1,0 +1,64 @@
+<template>
+  <scroll-view scroll-x="true" class="scroll-view-x" wx:if="{{!ttype || ttype==2}}">
+    <view  class="scroll-view-item" wx:for="{{tList}}" wx:key="*this">
+      <view class="{{currentTab==(index) ? 'on' : ''}}" bindtap="_swichNav" data-current="{{index}}">{{ !tname ? item.name : item[tname].name }}</view>
+    </view>
+  </scroll-view>
+  <!--内容列表-->
+  <slot>
+  </slot>
+</template>
+<script>
+import  wepy from 'wepy'
+export  default  class  slideTab extends wepy.component{
+    props ={
+      tList:{
+        type: Array,
+        value:[]
+      },
+      currentTab:{
+        type:Number,
+        value:0,
+        observer: function (newVal, oldVal) {
+          this.currentTab=newVal
+        }
+      },
+      tname:{
+        type:String,
+        value:''
+      },
+      ttype:{
+        type:Number,
+        value:''
+      }
+    }
+    methods={
+      _swichNav(e){
+        this.triggerEvent('changeCurrent', {
+          currentNum: e.currentTarget.dataset.current
+        })
+      }
+    }
+
+  }
+</script>
+<style>
+  .scroll-view-x{
+    background-color: #fff;
+    white-space: nowrap;
+    position:fixed;
+    z-index:10;
+    top:0
+  }
+  .scroll-view-x .scroll-view-item{
+    display:inline-block;
+    margin:0 35rpx;
+    line-height: 33px;
+    cursor: pointer;
+  }
+  .on{
+    border-bottom: 2px solid red;
+    color: red
+  }
+
+</style>
