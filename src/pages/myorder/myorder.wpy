@@ -1,249 +1,256 @@
 <template>
-  <view >
-    <slideTab :tList.sync="statusType"   bind:changeCurrent="swichNav" :currentTab.sync="currentType" >
-      <swiper current="{{currentType}}" duration="300" bindchange="bindChange" style="height: {{windowHeight-35}}px;margin-top:35px;">
-        <block>
-          <swiper-item wx:for="{{list}}">
-            <view class="no-order" hidden="{{item.length ? true : false}}">
-              <image src="../../images/no-order.png" class="no-order-img"></image>
-              <view class="text">暂无订单</view>
-            </view>
-            <scroll-view scroll-y="true" class="order-list" scroll-with-animation="true" lower-threshold="1" bindscrolltolower="scrolltolower" style="height: {{windowHeight-35}}px;" hidden="{{item ? flase : true}}">
-              <view class="a-order" wx:for="{{item}}"  wx:key="childIndex" wx:for-item="childItem" >
-                <view class="order-date">
-                  <view class="date-box">下单时间：{{childItem.dateAdd}}</view>
-                  <view class="status {{(childItem.status==-1 || childItem.status==4) ? '':'red'}}">{{item.statusStr}}</view>
-                </view>
-                <view class="goods-info" bindtap="orderDetail" data-id="{{childItem.id}}">
-                  <view class="goods-des">
-                    <view>订单号 : {{childItem.orderNumber}} </view>
-                    <view wx:if="{{childItem.remark && childItem.remark != ''}}">备注： {{item.remark}}</view>
-                  </view>
-                </view>
-                <view >
-                  <scroll-view class="goods-img-container" scroll-x="true">
-                    <view class="img-box" wx:for="{{goodsMap[currentType][childItem.id]}}" wx:for-item="child_item">
-                      <image src="{{child_item.pic}}" class="goods-img"></image>
-                    </view>
-                  </scroll-view>
-                </view>
-                <view class="price-box">
-                  <view class="total-price">合计：¥ {{childItem.amountReal}}</view>
-                  <view class="btn cancel-btn" hidden="{{childItem.status==0? false : true}}" bindtap="cancelOrderTap"  data-id="{{childItem.id}}">取消订单</view>
-                  <view class="btn topay-btn" hidden="{{childItem.status==0? fslse : true}}" bindtap="toPayTap" data-id="{{childItem.id}}" data-money="{{childItem.amountReal}}">马上付款</view>
-                </view>
-              </view>
-            </scroll-view>
-          </swiper-item>
-        </block>
-      </swiper>
-    </slideTab>
+  <!--tab模块-->
+  <view class="swiper-tab-pd">
+    <tab @currentTab.user="getCurrentTab" :tabList.sync="tabList" :currentTab.sync="currentTab"></tab>
   </view>
+  <scroll-view scroll-y="true" class="swiper-item-box" style="height:{{winHeight - 31}}px" bindscrolltolower="onReachBottom">
+    <orderItem :orderList.sync="orderList"></orderItem>
+    <!--加载更多时动画-->
+    <bottomLoadMore :show.sync="showLoading" message="正在加载"></bottomLoadMore>
+    <!--暂无数据显示-->
+    <placeholder :show.sync="is_empty" message="暂无发现数据"></placeholder>
+  </scroll-view>
 </template>
 <script>
-import wepy from  'wepy';
-import  wepay from '../../utils/pay';
-import  slideTab from '../../components/slide_tab'
-export  default class  myorder extends  wepy.page {
-  config = {
-    navigationBarTitleText: "全部订单",
-  }
-  components ={
-    slideTab:slideTab,
-  }
-  data = {
-    statusType: [
-      {name: "待付款", page: 0},
-      {name: "待发货", page: 0},
-      {name: "待收货", page: 0},
-      {name: "待评价", page: 0},
-      {name: "已完成", page: 0}],
-    currentType: 0,
-    list: [[], [], [], [], []],
-    goodsMap: [{}, {}, {}, {}, {}],
-    logisticsMap: [{}, {}, {}, {}, {}],
-    windowHeight: ''
-  }
-
-  onLoad(options) {
-    // this.getList();
-    var systemInfo = wx.getSystemInfoSync()
-    this.windowHeight=systemInfo.windowHeight,
-      this.currentType= options.id ? options.id : 0
-  };
-  swichNav(res) {
-    if (this.data.currentType == res.detail.currentNum) return;
-    this.currentType=0;
-  };
-  methods = {
-    // 点击tab切换
-    swichNav(res) {
-      if (this.data.currentType == res.detail.currentNum) return;
-      this.currentType=res.detail.currentNum;
-    },
-    bindChange(e) {
-      this.currentType= e.detail.current;
-      if (!this.data.list[e.detail.current].length);
+  import wepy from 'wepy';
+  import Tab from '../../components/tab'
+  import {
+    SYSTEM_INFO,
+    USER_SPECICAL_INFO
+  } from '../../utils/constant';
+  import OrderItem from '../../components/order_item'
+  import BottomLoadMore from "../../components/common/bottomLoadMore"
+  import Placeholder from "../../components/common/placeholder"
+  import api from '../../api/api';
+  export default class Order extends wepy.page {
+    config = {
+      navigationBarTitleText: "我的订单",
     }
-};
-}
+    components = {
+      tab: Tab,
+      orderItem: OrderItem,
+      bottomLoadMore: BottomLoadMore,
+      placeholder: Placeholder
+    }
+    data = {
+      winHeight: 0,
+      totalCount: 0,
+      tabList: ["全部订单", "待支付", "待收货", "已完成"],
+      orderList: [],
+      currentPage: 1,
+      is_empty: false,
+      orderStatus: "",
+      currentTab: 0,
+      flag: 0,
+      //是否显示 底部loading
+      showLoading: true,
+      //防止重复加载
+      preventRepeatReuqest: false,
+      //待付款
+      pendingPayCount : 0,
+      //待发货
+      backrdersCount : 0,
+      //待收货
+      shippedCount : 0,
 
+      receiveFlg : 0
+    }
+
+    async getMyOrder(currentPage, size,refresh) {
+
+      console.log("refresh值："+refresh);
+      let that = this;
+      console.log("orderStatus值");
+      console.log("orderStatus值" + that.orderStatus);
+      let userSpecialInfo = wepy.getStorageSync(USER_SPECICAL_INFO) || {};
+      let openId = userSpecialInfo.openid;
+      const json = await api.getMyOrderList({
+        query: {
+          openId: openId,
+          orderStatus: that.orderStatus,
+          receiveFlg : that.receiveFlg,
+          page: currentPage || 1,
+          size: size || 10,
+          type: 1 //正常单
+        }
+      });
+      if (json.data.code == 0) {
+        console.log("json.data.list");
+        console.log(json.data.list);
+        if (refresh) {
+          that.orderList = json.data.list;
+        } else {
+          that.orderList = [...that.orderList, ...json.data.list];
+        }
+        that.page_total = json.data.page_total;
+        that.totalCount = json.data.totalCount;
+        console.log("条目数：" + that.totalCount);
+        if (json.data.page_total == 0) {
+          //暂无数据
+          that.is_empty = true;
+        } else {
+          that.is_empty = false;
+        }
+        that.getMyOrderSize();
+        console.log("list返回数据");
+        console.log(that.orderList);
+      } else {
+        tip.error(json.data.msg)
+      }
+      that.showLoading = false;
+      that.$apply();
+    }
+
+    async getMyOrderSize() {
+      console.log("订单数量统计");
+      let that = this;
+      let userSpecialInfo = wepy.getStorageSync(USER_SPECICAL_INFO) || {};
+      let openId = userSpecialInfo.openid;
+      const json = await api.getMyOrderSize({
+        query: {
+          openId: openId
+        }
+      });
+      if (json.data.code == 0) {
+        //待付款
+        that.pendingPayCount = json.data.pendingPayCount;
+        //待发货
+        that.backrdersCount = json.data.backrdersCount;
+        //待收货
+        that.shippedCount = json.data.shippedCount;
+
+        //重写list
+        var dotList = ["全部订单", { name: "待支付", dotNum: that.pendingPayCount }, { name: "待收货", dotNum: that.backrdersCount }, "已完成"];
+        this.$invoke("tab", "changeList", dotList);
+        that.$apply();
+      }
+    }
+
+
+    onLoad(opts) {
+      let that = this;
+      let title = "";
+      that.orderList = [];
+      that.currentTab = opts.type;
+      that.getMyOrder();
+      //设置滚动高度
+      let systemInfo = wepy.getStorageSync(SYSTEM_INFO);
+      that.winHeight = systemInfo.windowHeight;
+      that.$apply();
+    }
+    computed = {
+
+    }
+    methods = {
+      getCurrentTab(cur, evt) {
+        this.currentPage = 1;
+        this.page_total = 0;
+        this.orderList = [];
+
+        let that = this;
+        that.currentTab = cur;
+        console.log("cur");
+        console.log(cur);
+        if (cur == 0) {
+          console.log("所有订单类型");
+          that.orderStatus = "";
+          that.getMyOrder();
+        } else if (cur == 1) {
+          console.log("未付款订单类型");
+          that.orderStatus = 0;
+          that.getMyOrder();
+        } else if (cur == 2) {
+          console.log("待收货订单类型");
+          that.orderStatus = 2;
+          that.receiveFlg=2;
+          that.getMyOrder();
+        } else if (cur == 3) {
+
+          console.log("已完成订单类型");
+          that.orderStatus = 4;
+          that.receiveFlg=4;
+          that.getMyOrder();
+        }
+        that.$apply();
+      },
+      /**
+       * 滑动切换tab
+       */
+      bindChange(e) {
+
+        let that = this;
+        that.currentTab = e.detail.current;
+        console.log("change tab...." + e.detailcurrent);
+        that.$apply();
+      },
+    }
+    events = {
+      refreshOrderList(msg){
+        console.log("msg值:"+msg);
+        if(msg==3){
+          this.currentTab=3;
+          this.$apply();
+          this.orderStatus = 4;
+        }
+        this.getMyOrder(1,10,1);
+      }
+    }
+    watch = {
+      currentTab(val) {
+        console.log("====" + val)
+      }
+    }
+
+    //加载更多
+    onReachBottom() {
+      console.log("加载更多");
+      let that = this;
+      that.showLoading = true;
+      console.log(that.page_total + "232===" + that.currentPage);
+      //判断总页数是否大于翻页数
+      if ((that.page_total) > that.currentPage) {
+        //防止重复加载
+        if (that.preventRepeatReuqest) {
+          return true;
+        }
+        that.preventRepeatReuqest = true;
+        that.currentPage++;
+        console.log(this.currentTab);
+        if (this.currentTab == 0) {
+          console.log("所有订单类型");
+          that.getMyOrder(that.currentPage);
+        } else if (this.currentTab == 1) {
+          console.log("未付款订单类型");
+          that.orderStatus = 0;
+          that.getMyOrder(that.currentPage);
+        } else if (this.currentTab == 2) {
+          console.log("待发货订单类型");
+          that.orderStatus = 2;
+          that.receiveFlg=2;
+          that.getMyOrder(that.currentPage);
+        } else if (this.currentTab == 3) {
+          console.log("已完成订单类型");
+          that.orderStatus = 4;
+          that.getMyOrder(that.currentPage);
+        }
+        that.preventRepeatReuqest = false;
+      } else {
+        that.showLoading = false;
+      }
+    };
+
+  }
 
 </script>
-<style>
-  .container{
-    width: 100%;
-    background-color: #F2f2f2;
-  }
-  .status-box{
-    width:100%;
-    height: 88rpx;
-    line-height: 88rpx;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #fff;
-  }
-  .status-box .status-label{
-    width: 150rpx;
-    height: 100%;
-    text-align: center;
-    font-size:28rpx;
-    color:#353535;
-    box-sizing: border-box;
-    position: relative;
-  }
-  .status-box .status-label.active{
-    color:#e64340;
-    border-bottom: 6rpx solid #e64340;
-  }
-  .status-box .status-label .red-dot{
-    width: 16rpx;
-    height: 16rpx;
-    position: absolute;
-    left: 116rpx;
-    top:23rpx;
-    background-color: #f43530;
-    border-radius: 50%;
-  }
-  .no-order{
-    width: 100%;
-    position: absolute;
-    bottom: 0;
-    top:0;
-    left: 0;
-    right: 0;
-    text-align: center;
-    padding-top: 203rpx;
-    background-color: #F2f2f2;
-  }
-  .no-order-img{
-    width: 81rpx;
-    height: 96rpx;
-    margin-bottom: 31rpx;
-  }
-  .no-order .text{
-    font-size:28rpx;
-    color:#999999;
-    text-align: center
-  }
-  .order-list{
-    width: 100%;
-  }
-  .order-list .a-order{
-    width: 100%;
-    background-color: #fff;
-    margin-top: 20rpx;
-  }
-  .order-list .a-order .order-date{
+<style lang="less">
+  .swiper-tab-pd {
     padding: 0 30rpx;
-    height: 88rpx;
-    display: flex;
-    justify-content: space-between;
-    font-size:26rpx;
-    color:#000000;
-    align-items: center;
+    background: #fff;
   }
-  .order-list .a-order .order-date .red{
-    font-size:26rpx;
-    color:#e64340;
+
+  .swiper-tab-order.active {
+    color: #ff4856;
+    border-bottom: 5rpx solid #ff4856;
   }
-  .a-order  .goods-info,
-  .goods-img-container{
-    width: 720rpx;
-    margin-left: 30rpx;
-    border-top: 1rpx solid #eee;
-    border-bottom: 1rpx solid #eee;
-    padding: 30rpx 0;
-    display: flex;
-    align-items: center;
-  }
-  .goods-info .img-box{
-    width: 120rpx;
-    height: 120rpx;
-    overflow: hidden;
-    margin-right: 30rpx;
-    background-color: #f7f7f7;
-  }
-  .goods-info .img-box .goods-img,
-  .goods-img-container .img-box .goods-img{
-    width: 120rpx;
-    height: 120rpx;
-  }
-  .goods-info  .goods-des{
-    width: 540rpx;
-    height: 78rpx;
-    line-height: 39rpx;
-    font-size:26rpx;
-    color:#000000;
-    overflow: hidden;
-  }
-  .goods-img-container{
-    height: 180rpx;
-    box-sizing: border-box;
-    white-space: nowrap;
-  }
-  .goods-img-container .img-box{
-    width: 120rpx;
-    height: 120rpx;
-    overflow: hidden;
-    margin-right: 20rpx;
-    background-color: #f7f7f7;
-    display: inline-block;
-  }
-  .order-list .a-order .price-box{
-    position: relative;
-    width: 720rpx;
-    height: 100rpx;
-    margin-left: 30rpx;
-    box-sizing: border-box;
-    padding: 20rpx 30rpx 20rpx 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size:26rpx;
-  }
-  .order-list .a-order .price-box .total-price{
-    font-size:26rpx;
-    color:#e64340;
-  }
-  .a-order .price-box .btn{
-    width: 166rpx;
-    height: 60rpx;
-    box-sizing: border-box;
-    text-align: center;
-    line-height: 60rpx;
-    border-radius: 6rpx;
-    margin-left: 20rpx;
-  }
-  .a-order .price-box .cancel-btn{
-    border: 1rpx solid #ccc;
-    position: absolute;
-    right: 216rpx;
-    top:20rpx;
-  }
-  .a-order .price-box .topay-btn{
-    border:1px solid #e64340;
-    color: #e64340;
-  }
+
 </style>
