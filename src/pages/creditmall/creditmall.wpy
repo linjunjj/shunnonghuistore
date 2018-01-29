@@ -309,9 +309,9 @@
   padding: 10rpx;
 }
 .recommend-title {
-  padding: 40rpx 0;
+  padding: 14rpx 0;
   text-align: center;
-  color: #333;
+  color: #333333;
 }
 .goods-box{
   width: 300rpx;
