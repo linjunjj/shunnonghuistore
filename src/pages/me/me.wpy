@@ -34,7 +34,6 @@
         <text>已完成</text>
       </view>
     </view>
-
     <view style="height:20rpx;background: #eee;width:100%;"></view>
     <view class="my-item">
       <navigator url="/pages/my-setUp/index" hover-class="navigator-hover"><image src='../../images/my-info/jifen.png'></image>我的积分</navigator>
@@ -52,7 +51,10 @@
       <button  open-type="contact" send-message-title="在线官方客服" style="width:100%;height:100%;position:absolute;opacity:0"></button>
       <image src='../../images/my-info/kefu.png'></image>官方客服
     </view>
-
+    <view style="height:10rpx;background: #eee;width:100%;"></view>
+    <view class="my-item" style="border:none;padding:0rpx;margin:0rpx;background:none;border:none;height:auto;line-height:auto;">
+      <button type="primary" bindtap="relogin">我要入驻</button>
+    </view>
 
   </view>
 </template>
