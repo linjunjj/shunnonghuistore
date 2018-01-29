@@ -1,0 +1,57 @@
+<template>
+  <scroll-view scroll-x="true" class="scroll-view-x">
+    <tab @currentTab.user="getCurrentTab" :tabList.sync="tabList" :currentTab.sync="currentTab"></tab>
+  </scroll-view>
+  <scroll-view scroll-y="true" class="swiper-item-box" style="height:{{winHeight - 31}}px" bindscrolltolower="onReachBottom">
+    <view class="fifler">
+      <filterBar @currentType.user="currentType"></filterBar>
+    </view>
+    <shopGridList :purchasetype.sync="purchasetype" :list.sync="list"></shopGridList>
+
+    <!--加载更多时动画-->
+    <bottomLoadMore :show.sync="showLoading" message="正在加载"></bottomLoadMore>
+    <!--暂无数据显示-->
+    <placeholder :show.sync="is_empty" message="暂无发现数据"></placeholder>
+  </scroll-view>
+</template>
+<script>
+import wepy from 'wepy'
+import  Tab from  '../../components/tab'
+import FilterBar from  '../../components/filter_bar'
+import BottomLoadMore from "../../components/common/bottomLoadMore"
+import Placeholder from "../../components/common/placeholder"
+  export  default  class  mianshop extends  wepy.page{
+  config= {
+    navigationBarTitleText: "主营商城",
+  };
+    components = {
+      tab: Tab,
+      shopGridList: ShopGridList,
+      bottomLoadMore: BottomLoadMore,
+      placeholder: Placeholder,
+      filterBar:FilterBar,
+    }
+    data={
+
+    }
+
+  }
+</script>
+<style>
+  .scroll-view-x{
+    background-color: #fff;
+    white-space: nowrap;
+    position:fixed;
+    z-index:10;
+    top:0
+  }
+  .swiper-tab-pd {
+    padding: 0 30rpx;
+    background: #fff;
+  }
+
+  .swiper-tab-order.active {
+    color: #ff4856;
+    border-bottom: 5rpx solid #ff4856;
+  }
+</style>

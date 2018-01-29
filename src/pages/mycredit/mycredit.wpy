@@ -31,8 +31,8 @@
     SYSTEM_INFO,
     USER_SPECICAL_INFO,
     USER_INFO
-  } from '../utils/constant';
-  import PointsDetail from '../components/points_detail'
+  } from '../../utils/constant';
+  import PointsDetail from '../../components/points_detail'
   export default class Points extends wepy.page {
     config = {
       navigationBarTitleText: '我的积分',
