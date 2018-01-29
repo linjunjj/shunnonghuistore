@@ -42,7 +42,7 @@
     methods={
       goToIndex(){
         wx.switchTab({
-          url: '/pages/index/index',
+          url: '/pages/home/home',
         });
       }
     }
@@ -82,7 +82,7 @@
   }
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
   page{
     font-family: -apple-system-font, Helvetica Neue, Helvetica, sans-serif;
     font-size: 10pt;

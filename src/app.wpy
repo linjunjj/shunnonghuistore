@@ -2,369 +2,161 @@
   @import "./styles/base";
   @import "./styles/icon";
   @import "./styles/style";
-.container {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  box-sizing: border-box;
-}
+
 </style>
-
 <script>
-import wepy from 'wepy'
-import 'wepy-async-function'
-import {
-  USER_SPECICAL_INFO,
-  USER_INFO,
-  SYSTEM_INFO,
-  ADDRESS_ID,
-  SEL_CLASS_CODE
-} from "./utils/constant";
-import {
-  wxJsCode2Session,
-  user2session
-} from './api/api';
-export default class extends wepy.app {
-  config = {
-    pages: [
-      'pages/start/start',
+  import wepy from 'wepy';
+  import 'wepy-async-function'
+  import {
+    USER_SPECICAL_INFO,
+    USER_INFO,
+    SYSTEM_INFO,
+    ADDRESS_ID,
+    SEL_CLASS_CODE
+  } from "./utils/constant";
+  import {
+    wxJsCode2Session,
+    user2session
+  } from './api/api';
 
-    ],
-    window: {
-      backgroundTextStyle: 'dark',
-      navigationBarBackgroundColor: '#FFFFFF',
-      navigationBarTitleText: 'WeChat',
-      navigationBarTextStyle: 'black',
-      enablePullDownRefresh: false,
-      backgroundColor: '#EFEFEF'
-    },
-    "tabBar": {
-      "color": "#999999",
-      "selectedColor": "#ff6a3c",
-      "backgroundColor": "#ffffff",
-      "borderStyle": "black",
-      "list": [{
-        "pagePath": "pages/start/start",
-        "text": "首页",
-        "iconPath": "images/icon_home.png",
-        "selectedIconPath": "images/icon_home_active.png"
-      }, {
-        "pagePath": "pages/start/start",
-        "text": "分类",
-        "iconPath": "images/icon_classify.png",
-        "selectedIconPath": "images/icon_classify_active.png"
-      }, {
-        "pagePath": "pages/start/start",
-        "text": "购物车",
-        "iconPath": "images/icon_shop_cart.png",
-        "selectedIconPath": "images/icon_shop_cart_active.png"
-      }, {
-        "pagePath": "pages/start/start",
-        "text": "我",
-        "iconPath": "images/icon_info.png",
-        "selectedIconPath": "images/icon_info_active.png"
-      }]
+  export default class extends wepy.app {
+    config = {
+      pages: [
+        // 'pages/start/start',
+        'pages/home/home',
+        'pages/me/me',
+      ],
+      window: {
+        backgroundTextStyle: 'dark',
+        navigationBarBackgroundColor: '#FFFFFF',
+        navigationBarTitleText: 'WeChat',
+        navigationBarTextStyle: 'black',
+        enablePullDownRefresh: false,
+        backgroundColor: '#EFEFEF'
+
+      },
+      "tabBar": {
+        "color": "#999999",
+        "selectedColor": "#ff6a3c",
+        "backgroundColor": "#ffffff",
+        "borderStyle": "black",
+        "list": [{
+          "pagePath": "pages/home/home",
+          "text": "首页",
+          "iconPath": "images/icon_home.png",
+          "selectedIconPath": "images/icon_home_active.png"
+        }, {
+          "pagePath": "pages/home/home",
+          "text": "分类",
+          "iconPath": "images/icon_classify.png",
+          "selectedIconPath": "images/icon_classify_active.png"
+        }, {
+          "pagePath": "pages/home/home",
+          "text": "购物车",
+          "iconPath": "images/icon_shop_cart.png",
+          "selectedIconPath": "images/icon_shop_cart_active.png"
+        }, {
+          "pagePath": "pages/me/me",
+          "text": "我",
+          "iconPath": "images/icon_info.png",
+          "selectedIconPath": "images/icon_info_active.png"
+        }]
+      }
     }
-  }
 
-  globalData = {
-    userInfo: null,
-    appid:"",
-    secret:"",
-    subDomain:'tz',
-  }
-  constructor () {
-    super()
-    this.use('requestfix')
-    this.use('promisify');
+    globalData = {
+      userInfo: null,
+      appid: 'wx6b121941b200ea50',
+      secret: '36a76b0682bd2c3f1541fd012fac66f5',
+    }
 
-  }
-  //  onLaunch() {
-  //   var that = this;
-  //   //  获取商城名称
-  //   wx.request({
-  //     url: 'https://api.it120.cc/'+ that.globalData.subDomain +'/config/get-value',
-  //     data: {
-  //       key: 'mallName'
-  //     },
-  //     success: function(res) {
-  //       if (res.data.code == 0) {
-  //         wx.setStorageSync('mallName', res.data.data.value);
-  //       }
-  //     }
-  //   })
-  //   wx.request({
-  //     url: 'https://api.it120.cc/' + that.globalData.subDomain + '/score/send/rule',
-  //     data: {
-  //       code: 'goodReputation'
-  //     },
-  //     success: function (res) {
-  //       if (res.data.code == 0) {
-  //         that.globalData.order_reputation_score = res.data.data[0].score;
-  //       }
-  //     }
-  //   })
-  //   wx.request({
-  //     url: 'https://api.it120.cc/' + that.globalData.subDomain + '/config/get-value',
-  //     data: {
-  //       key: 'recharge_amount_min'
-  //     },
-  //     success: function (res) {
-  //       if (res.data.code == 0) {
-  //         that.globalData.recharge_amount_min = res.data.data.value;
-  //       }
-  //     }
-  //   })
-  //   this.login();
-  // };
-  // login  () {
-  //   var that = this;
-  //   var token = that.globalData.token;
-  //   if (token) {
-  //     wx.request({
-  //       url: 'https://api.it120.cc/' + that.globalData.subDomain + '/user/check-token',
-  //       data: {
-  //         token: token
-  //       },
-  //       success: function (res) {
-  //         if (res.data.code != 0) {
-  //           that.globalData.token = null;
-  //           that.login();
-  //         }
-  //       }
-  //     })
-  //     return;
-  //   }
-  //   wx.login({
-  //     success: function (res) {
-  //       wx.request({
-  //         url: 'https://api.it120.cc/'+ that.globalData.subDomain +'/user/wxapp/login',
-  //         data: {
-  //           code: res.code
-  //         },
-  //         success: function(res) {
-  //           if (res.data.code == 10000) {
-  //             // 去注册
-  //             that.registerUser();
-  //             return;
-  //           }
-  //           if (res.data.code != 0) {
-  //             // 登录错误
-  //             wx.hideLoading();
-  //             wx.showModal({
-  //               title: '提示',
-  //               content: '无法登录，请重试',
-  //               showCancel:false
-  //             })
-  //             return;
-  //           }
-  //           //console.log(res.data.data)
-  //           that.globalData.token = res.data.data.token;
-  //           that.globalData.uid = res.data.data.uid;
-  //         }
-  //       })
-  //     }
-  //   })
-  // };
-  // registerUser () {
-  //   var that = this;
-  //   wx.login({
-  //     success: function (res) {
-  //       var code = res.code; // 微信登录接口返回的 code 参数，下面注册接口需要用到
-  //       wx.getUserInfo({
-  //         success: function (res) {
-  //           var iv = res.iv;
-  //           var encryptedData = res.encryptedData;
-  //           // 下面开始调用注册接口
-  //           wx.request({
-  //             url: 'https://api.it120.cc/' + that.globalData.subDomain +'/user/wxapp/register/complex',
-  //             data: {code:code,encryptedData:encryptedData,iv:iv}, // 设置请求的 参数
-  //             success: (res) =>{
-  //               wx.hideLoading();
-  //               that.login();
-  //             }
-  //           })
-  //         }
-  //       })
-  //     }
-  //   })
-  // };
-  // sendTempleMsg (orderId, trigger, template_id, form_id, page, postJsonString){
-  //   var that = this;
-  //   wx.request({
-  //     url: 'https://api.it120.cc/' + that.globalData.subDomain + '/template-msg/put',
-  //     method:'POST',
-  //     header: {
-  //       'content-type': 'application/x-www-form-urlencoded'
-  //     },
-  //     data: {
-  //       token: that.globalData.token,
-  //       type:0,
-  //       module:'order',
-  //       business_id: orderId,
-  //       trigger: trigger,
-  //       template_id: template_id,
-  //       form_id: form_id,
-  //       url:page,
-  //       postJsonString: postJsonString
-  //     },
-  //     success: (res) => {
-  //       //console.log('*********************');
-  //       //console.log(res.data);
-  //       //console.log('*********************');
-  //     }
-  //   })
-  // };
-  // sendTempleMsgImmediately (template_id, form_id, page, postJsonString) {
-  //   var that = this;
-  //   wx.request({
-  //     url: 'https://api.it120.cc/' + that.globalData.subDomain + '/template-msg/put',
-  //     method: 'POST',
-  //     header: {
-  //       'content-type': 'application/x-www-form-urlencoded'
-  //     },
-  //     data: {
-  //       token: that.globalData.token,
-  //       type: 0,
-  //       module: 'immediately',
-  //       template_id: template_id,
-  //       form_id: form_id,
-  //       url: page,
-  //       postJsonString: postJsonString
-  //     },
-  //     success: (res) => {
-  //       console.log('*********************');
-  //       console.log(res.data);
-  //       console.log('*********************');
-  //     }
-  //   })
-  // };
-  // getUserInfo (cb) {
-  //   var that = this
-  //   if (this.globalData.userInfo) {
-  //     typeof cb == "function" && cb(this.globalData.userInfo)
-  //   } else {
-  //     //调用登陆接口
-  //     wx.login({
-  //       success: function () {
-  //         wx.getUserInfo({
-  //           success: function (res) {
-  //             that.globalData.userInfo = res.userInfo
-  //             typeof cb == "function" && cb(that.globalData.userInfo)
-  //           }
-  //         })
-  //       }
-  //     })
-  //   }
-  //
-  // };
-  // // sleep (s) {
-  // //   return new Promise((resolve, reject) => {
-  // //     setTimeout(() => {
-  // //       resolve('promise resolved')
-  // //     }, s * 1000)
-  // //   })
-  // // }
-  // //
-  // // async testAsync () {
-  // //   const data = await this.sleep(3)
-  // //   console.log(data)
-  // // }
-  // //
-  // // getUserInfo(cb) {
-  // //   const that = this
-  // //   if (this.globalData.userInfo) {
-  // //     return this.globalData.userInfo
-  // //   }
-  // //   wepy.getUserInfo({
-  // //     success (res) {
-  // //       that.globalData.userInfo = res.userInfo
-  // //       cb && cb(res.userInfo)
-  // //     }
-  // //   })
-  // // }
-  async onLaunch() {
-    let that = this;
-    //用户信息
-    let userSpecialInfo = wepy.getStorageSync(USER_SPECICAL_INFO) || {};
-    // 用户普通信息
-    let userInfo = wepy.getStorageSync(USER_INFO) || {};
+    constructor() {
+      super()
+      this.use('requestfix')
+      this.use('promisify');
 
-    //如果信息过期
-    if ((!userSpecialInfo.openid || (userSpecialInfo.expires_in || Date.now()) < (Date.now() + 600)) && (!userInfo.nickName)) {
-      let res = await wepy.login();
-      console.log("safsfsdfsdfsdfsdfsf");
-      console.log(res);
-      if (res.code) {
-        let d = that.globalData; //这里存储了appid、secret、token串    
-        //存储userInfo 
-        let c = await wepy.getUserInfo();
-        wepy.setStorageSync(USER_INFO, c.userInfo);
+    }
+    async onLaunch() {
+      let that = this;
+      //用户信息
+      let userSpecialInfo = wepy.getStorageSync(USER_SPECICAL_INFO) || {};
+      // 用户普通信息
+      let userInfo = wepy.getStorageSync(USER_INFO) || {};
 
-        //存储系统信息 
-        let systemInfo = wepy.getSystemInfoSync();
-        wepy.setStorageSync(SYSTEM_INFO, systemInfo);
-        wxJsCode2Session({
-          query: {
-            jsCode: res.code,
-            nickName: c.userInfo.nickName
-          }
-        }).then(resp => {
-          var rlt = resp.data;
-          console.log("wxJsCode2Session..." + JSON.stringify(rlt));
-          if (rlt.result) {
-            var data = rlt.data;
-            if (data.openid) {
+      //如果信息过期
+      if ((!userSpecialInfo.openid || (userSpecialInfo.expires_in || Date.now()) < (Date.now() + 600)) && (!userInfo.nickName)) {
+        let res = await wepy.login();
+        console.log("safsfsdfsdfsdfsdfsf");
+        console.log(res);
+        if (res.code) {
+          let d = that.globalData; //这里存储了appid、secret、token串    
+          //存储userInfo 
+          let c = await wepy.getUserInfo();
+          wepy.setStorageSync(USER_INFO, c.userInfo);
+
+          //存储系统信息 
+          let systemInfo = wepy.getSystemInfoSync();
+          wepy.setStorageSync(SYSTEM_INFO, systemInfo);
+          wxJsCode2Session({
+            query: {
+              jsCode: res.code,
+              nickName: c.userInfo.nickName
+            }
+          }).then(resp => {
+            var rlt = resp.data;
+            console.log("wxJsCode2Session..." + JSON.stringify(rlt));
+            if (rlt.result) {
+              var data = rlt.data;
+              if (data.openid) {
+                let obj = {};
+                obj.openid = data.openid;
+                obj.expires_in = Date.now() + data.expires_in;
+                //存储openid 
+                wepy.setStorageSync(USER_SPECICAL_INFO, obj);
+              }
+            } else {
               let obj = {};
-              obj.openid = data.openid;
-              obj.expires_in = Date.now() + data.expires_in;
+              obj.openid = "oeuj50KHMqsh5kYZYWQJuwmY5yG0";
+              obj.expires_in = "7200";
               //存储openid 
               wepy.setStorageSync(USER_SPECICAL_INFO, obj);
             }
-          } else {
-            let obj = {};
-            obj.openid = "oeuj50KHMqsh5kYZYWQJuwmY5yG0";
-            obj.expires_in = "7200";
-            //存储openid 
-            wepy.setStorageSync(USER_SPECICAL_INFO, obj);
-          }
-        });
+          });
 
-        let url = 'https://api.weixin.qq.com/sns/jscode2session?appid=' + d.appid + '&secret=' + d.secret + '&js_code=' + res.code + '&grant_type=authorization_code';
+          let url = 'https://api.weixin.qq.com/sns/jscode2session?appid=' + d.appid + '&secret=' + d.secret + '&js_code=' + res.code + '&grant_type=authorization_code';
 
-        /* let b = await wepy.request({
-             url: url,
-             data: {},
-             method: 'POST',
-             header: {
-                 'content-Type': 'application/x-www-form-urlencoded'
-             }
-         });
-         if (b.data.openid) {
-             let obj = {};
-             obj.openid = b.data.openid;
-             obj.expires_in = Date.now() + b.data.expires_in;
+          /* let b = await wepy.request({
+               url: url,
+               data: {},
+               method: 'POST',
+               header: {
+                   'content-Type': 'application/x-www-form-urlencoded'
+               }
+           });
+           if (b.data.openid) {
+               let obj = {};
+               obj.openid = b.data.openid;
+               obj.expires_in = Date.now() + b.data.expires_in;
 
-             //存储openid 
-             wepy.setStorageSync(USER_SPECICAL_INFO, obj);
+               //存储openid 
+               wepy.setStorageSync(USER_SPECICAL_INFO, obj);
 
-             //存储userInfo 
-             let c = await wepy.getUserInfo();
-             wepy.setStorageSync(USER_INFO, c.userInfo);
+               //存储userInfo 
+               let c = await wepy.getUserInfo();
+               wepy.setStorageSync(USER_INFO, c.userInfo);
 
-             //存储系统信息 
-             let systemInfo = await wepy.getSystemInfoSync();
-             wepy.setStorageSync(SYSTEM_INFO, systemInfo);
-             console.log(b, '登陆成功')
-         }*/
+               //存储系统信息 
+               let systemInfo = await wepy.getSystemInfoSync();
+               wepy.setStorageSync(SYSTEM_INFO, systemInfo);
+               console.log(b, '登陆成功')
+           }*/
 
-      } else {
-        console.log('获取用户登录态失败！' + res.errMsg)
+        } else {
+          console.log('获取用户登录态失败！' + res.errMsg)
+        }
+
       }
-
     }
   }
-}
+
 </script>

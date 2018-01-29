@@ -74,7 +74,7 @@
 </script>
 <style lang="less">
   .header {
-    background: #ff6a3c;
+    background: #666666;
     height: 260rpx;
     width: 100%;
   }
@@ -82,6 +82,7 @@
   .header_content {
     width: 100%;
     margin: 0 auto;
+    position: relative;
     text-align: center;
     padding-top: 48rpx;
   }
