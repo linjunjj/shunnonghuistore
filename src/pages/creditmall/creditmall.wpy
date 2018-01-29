@@ -1,0 +1,391 @@
+<template>
+<view class="container">
+
+<view class="creditlist">
+  <navigator open-type="navigate" url="/pages/sign_in">
+    <image src="../../images/mycredit.png" class="nav_icon"></image>
+    <view class="nav_text">我的积分：<span style="color: #09bb07">64</span></view>
+  </navigator>
+  <navigator open-type="navigate" url="/pages/exchange_goods">
+    <image src="../../images/crerecard.png" class="nav_icon"></image>
+    <view class="nav_text">积分记录</view>
+  </navigator>
+</view>
+  <view style="height:20rpx;background: #eee;width:100%;"></view>
+  <view class="coupons" hidden="{{hasNoCoupons}}">
+    <scroll-view class="coupons-scroll" scroll-x="true">
+      <view class="coupons-item" wx:for-items="{{coupons}}" wx:for-index="idx" wx:key="id"  bindtap="gitCoupon" data-id="{{item.id}}">
+        <view style="font-size: 35rpx;color: #ffffff"> ￥ {{item.moneyMax}}元 </view>
+        <view style="font-size: 20rpx;color: #ffffff"> {{item.name}} </view>
+        <view style="font-size: 20rpx;color: #ffffff"> 满 {{item.moneyHreshold}} 元使用 </view>
+        <view wx:if="{{item.dateEndType == 0}}" style="font-size: 20rpx;color: #ffffff"> {{item.dateEnd}} 前有效 </view>
+        <view wx:if="{{item.dateEndType == 1}}" style="font-size: 20rpx;color: #ffffff"> 领取 {{item.dateEndDays}} 天内有效 </view>
+      </view>
+    </scroll-view>
+  </view>
+  <view class="goods-container">
+    <view class="goods-box" wx:for-items="{{goods}}" wx:key="{{index}}" bindtap="toDetailsTap" data-id="{{item.id}}">
+      <view class="img-box">
+        <image src="{{item.pic}}_m" class="image" mode="aspectFill" lazy-load="true"/>
+      </view>
+      <view class="goods-title">{{item.name}}</view>
+      <view style='display:flex;'>
+        <view class="goods-price">¥ {{item.minPrice}}</view>
+        <view wx:if="{{item.originalPrice && item.originalPrice > 0}}" class="goods-price" style='color:#aaa;text-decoration:line-through'>¥ {{item.originalPrice}}</view>
+      </view>
+    </view>
+  </view>
+</view>
+
+  <!--加载更多时动画-->
+  <bottomLoadMore :show.sync="showLoading" message="正在加载"></bottomLoadMore>
+  <!--暂无数据显示-->
+  <placeholder :show.sync="is_empty" message="暂无发现数据"></placeholder>
+</template>
+<script>
+  import wepy from 'wepy';
+  import BottomLoadMore from "../../components/common/bottomLoadMore"
+  import Placeholder from "../../components/common/placeholder"
+  export  default class  creditmall extends  wepy.page{
+    config={
+      navigationBarTitleText:"积分商城"
+    }
+    components = {
+      bottomLoadMore: BottomLoadMore,
+      placeholder: Placeholder
+    }
+    data = {
+      list: [],
+      purchasetype: 1,
+      special:1, ////0-正常入库;1-特价专区和换货专区
+      //是否有数据
+      is_empty: false,
+      //当前页面
+      currentPage: 1,
+      //总页数
+      page_total: 0,
+      //是否显示 底部loading
+      showLoading: true,
+      //防止重复加载
+      preventRepeatReuqest: false,
+      goods:[
+        {
+          "barCode": "",
+          "categoryId": 2246,
+          "characteristic": "尼多熊袜子，适合秋冬",
+          "commission": 5,
+          "commissionType": 2,
+          "dateAdd": "2017-10-30 10:51:08",
+          "dateStart": "2017-10-30 10:44:34",
+          "dateUpdate": "2018-01-22 07:14:14",
+          "id": 6765,
+          "logisticsId": 386,
+          "minPrice": 80,
+          "name": "1-3岁袜子",
+          "numberFav": 0,
+          "numberGoodReputation": 1,
+          "numberOrders": 1,
+          "originalPrice": 0,
+          "paixu": 0,
+          "pic": "https://cdn.it120.cc/apifactory/2017/10/30/b07ee85fa64f0c68aa9a45fba20ec689.jpg",
+          "recommendStatus": 0,
+          "recommendStatusStr": "普通",
+          "shopId": 0,
+          "status": 0,
+          "statusStr": "上架",
+          "stores": 700000,
+          "userId": 951,
+          "videoId": "c4c6e38eeb3a428e80f1a8b32c6de587",
+          "views": 5493,
+          "weight": 0
+        },
+        {
+          "barCode": "",
+          "categoryId": 2246,
+          "characteristic": "尼多熊袜子，适合秋冬天",
+          "commission": 5,
+          "commissionType": 2,
+          "dateAdd": "2017-10-30 10:44:23",
+          "dateStart": "2017-10-30 10:39:02",
+          "dateUpdate": "2018-01-22 07:14:23",
+          "id": 6761,
+          "logisticsId": 386,
+          "minPrice": 90,
+          "name": "10-12岁袜子",
+          "numberFav": 0,
+          "numberGoodReputation": 5,
+          "numberOrders": 5,
+          "originalPrice": 0,
+          "paixu": 0,
+          "pic": "https://cdn.it120.cc/apifactory/2017/10/30/bc15e96f20fb13cc7d35f90d743ccb17.jpg",
+          "recommendStatus": 0,
+          "recommendStatusStr": "普通",
+          "shopId": 0,
+          "status": 0,
+          "statusStr": "上架",
+          "stores": 9999995,
+          "userId": 951,
+          "videoId": "",
+          "views": 2833,
+          "weight": 0
+        },
+        {
+          "barCode": "",
+          "categoryId": 2246,
+          "characteristic": "尼多熊袜子，适合秋冬天",
+          "commission": 5,
+          "commissionType": 2,
+          "dateAdd": "2017-10-30 10:44:16",
+          "dateStart": "2017-10-30 10:39:02",
+          "id": 6760,
+          "logisticsId": 386,
+          "minPrice": 90,
+          "name": "10-12岁袜子",
+          "numberFav": 0,
+          "numberGoodReputation": 0,
+          "numberOrders": 0,
+          "originalPrice": 0,
+          "paixu": 0,
+          "pic": "https://cdn.it120.cc/apifactory/2017/10/30/bc15e96f20fb13cc7d35f90d743ccb17.jpg",
+          "recommendStatus": 0,
+          "recommendStatusStr": "普通",
+          "shopId": 0,
+          "status": 0,
+          "statusStr": "上架",
+          "stores": 10,
+          "userId": 951,
+          "views": 1204,
+          "weight": 0
+        },
+        {
+          "barCode": "",
+          "categoryId": 2246,
+          "characteristic": "尼多熊袜子，适合3-5岁宝宝",
+          "commission": 5,
+          "commissionType": 2,
+          "dateAdd": "2017-10-30 10:36:44",
+          "dateStart": "2017-10-30 10:34:01",
+          "id": 6748,
+          "logisticsId": 386,
+          "minPrice": 85,
+          "name": "3-5岁可爱袜子",
+          "numberFav": 0,
+          "numberGoodReputation": 0,
+          "numberOrders": 0,
+          "originalPrice": 0,
+          "paixu": 0,
+          "pic": "https://cdn.it120.cc/apifactory/2017/10/30/706ce9a593eafa29f2ded527553dbec9.jpg",
+          "recommendStatus": 0,
+          "recommendStatusStr": "普通",
+          "shopId": 0,
+          "status": 0,
+          "statusStr": "上架",
+          "stores": 10,
+          "userId": 951,
+          "views": 1145,
+          "weight": 0
+        },],
+      coupons: [
+        {
+          "dateAdd": "2017-09-16 17:00:46",
+          "dateEndDays": 15,
+          "dateEndType": 1,
+          "dateStartType": 1,
+          "id": 223,
+          "moneyHreshold": 300,
+          "moneyMax": 40,
+          "moneyMin": 40,
+          "name": "新店优惠",
+          "needScore": 0,
+          "numberGit": 2108,
+          "numberGitNumber": 1294,
+          "numberLeft": 997891,
+          "numberPersonMax": 999999,
+          "numberTotle": 999999,
+          "numberUsed": 11,
+          "status": 0,
+          "statusStr": "正常",
+          "type": ""
+        },
+        {
+          "dateAdd": "2017-09-16 17:00:05",
+          "dateEndDays": 15,
+          "dateEndType": 1,
+          "dateStartType": 1,
+          "id": 222,
+          "moneyHreshold": 200,
+          "moneyMax": 25,
+          "moneyMin": 25,
+          "name": "新店优惠",
+          "needScore": 0,
+          "numberGit": 1854,
+          "numberGitNumber": 1055,
+          "numberLeft": 998145,
+          "numberPersonMax": 999999,
+          "numberTotle": 999999,
+          "numberUsed": 9,
+          "status": 0,
+          "statusStr": "正常",
+          "type": ""
+        },
+        {
+          "dateAdd": "2017-09-16 16:58:18",
+          "dateEndDays": 15,
+          "dateEndType": 1,
+          "dateStartType": 1,
+          "id": 221,
+          "moneyHreshold": 100,
+          "moneyMax": 10,
+          "moneyMin": 10,
+          "name": "新店优惠",
+          "needScore": 0,
+          "numberGit": 921,
+          "numberGitNumber": 538,
+          "numberLeft": 9999078,
+          "numberPersonMax": 999999,
+          "numberTotle": 9999999,
+          "numberUsed": 28,
+          "status": 0,
+          "statusStr": "正常",
+          "type": ""
+        }
+      ],
+      hasNoCoupons:false
+    }
+
+    onLoad() {
+      let that = this;
+      that.list = [];
+      //that.list = bb.result.products;
+      //console.log(bb.result.products)
+    }
+    computed = {
+
+    }
+    methods = {
+
+
+    }
+    events = {
+
+    }
+
+    //加载更多
+    // onReachBottom() {
+    //   let that = this;
+    //   that.showLoading = true;
+    //   console.log(that.page_total + "===" + that.currentPage);
+    //   //判断总页数是否大于翻页数
+    //   if ((that.page_total) > that.currentPage) {
+    //     //防止重复加载
+    //     if (that.preventRepeatReuqest) {
+    //       return true;
+    //     }
+    //     that.preventRepeatReuqest = true;
+    //     that.currentPage++;
+    //     that.getGoodList(that.currentPage);
+    //     that.preventRepeatReuqest = false;
+    //   } else {
+    //     that.showLoading = false;
+    //   }
+    // };
+  }
+
+</script>
+<style>
+.container{
+  position: relative;
+  background: #ffffff;
+}
+.goods-container{
+  display: flex;
+  justify-content: space-around;
+  flex-wrap:wrap;
+  box-sizing: content-box;
+  padding: 10rpx;
+}
+.goods-box{
+  width: 300rpx;
+  height: 380rpx;
+  background-color: #fff;
+  overflow: hidden;
+  margin-bottom: 10rpx;
+}
+.goods-box .img-box{
+  width: 300rpx;
+  height: 300rpx;
+  overflow: hidden;
+}
+.goods-box .img-box image{
+  width: 300rpx;
+  height: 300rpx;
+}
+.goods-box .goods-title{
+  width: 280rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: 24rpx;
+  padding: 15rpx 0 0rpx 0;
+  color:#000;
+  margin-left: 20rpx;
+}
+.goods-box .goods-price{
+  width: 246rpx;
+  overflow: hidden;
+  font-size: 24rpx;
+  padding: 3rpx 0;
+  color:#e64340;
+  margin-left: 20rpx;
+}
+  .creditlist {
+    display: flex;
+    font-size: 26rpx;
+    justify-content: space-around;
+    text-align: center;
+    padding: 17rpx 50rpx;
+  }
+  .creditlist .nav_icon{
+    height: 80rpx;
+    margin: 0 auto;
+    width: 80rpx;
+    margin-bottom: 14rpx;
+  }
+.coupons{
+  margin-top:10rpx;
+  width: 100%;
+  height: 180rpx;
+  overflow: hidden;
+}
+.coupons-scroll{
+  white-space: nowrap;
+  height: 180rpx;
+  width: 100%;
+  background-color: #fff;
+}
+.coupons-item{
+  width:300rpx;
+  height: 180rpx;
+  margin: 10rpx;
+  padding-top: 20rpx;
+  padding-left: 15rpx;
+  background-color: #f1a83b;
+  box-sizing: content-box;
+  font-size: 15rpx;
+  line-height: 35rpx;
+  overflow: hidden;
+  color: #fff;
+  display: inline-block;
+}
+::-webkit-scrollbar{
+  width: 0;
+  height: 0;
+  color: transparent;
+}
+
+image{
+
+  display: inline-block;
+  overflow: hidden;
+}
+</style>

@@ -24,6 +24,7 @@
       pages: [
         // 'pages/sign/sign',
         // 'pages/start/start',
+        'pages/creditmall/creditmall',
         'pages/home/home',
         'pages/me/me',
         'pages/sign/sign'
