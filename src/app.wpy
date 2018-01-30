@@ -22,12 +22,12 @@
   export default class extends wepy.app {
     config = {
       pages: [
-        'pages/mainshop/mainshop',
-        'pages/apply/apply',
-        'pages/myorder/myorder',
-        // 'pages/sign/sign',
-        // 'pages/start/start',
-        'pages/creditmall/creditmall',
+        // 'pages/mainshop/mainshop',
+        // 'pages/apply/apply',
+        // 'pages/myorder/myorder',
+        // // 'pages/sign/sign',
+        // // 'pages/start/start',
+        // 'pages/creditmall/creditmall',
         'pages/home/home',
         'pages/me/me',
         'pages/sign/sign'
@@ -53,7 +53,7 @@
           "selectedIconPath": "images/icon_home_active.png"
         }, {
           "pagePath": "pages/home/home",
-          "text": "分类",
+          "text": "积分商城",
           "iconPath": "images/icon_classify.png",
           "selectedIconPath": "images/icon_classify_active.png"
         }, {
