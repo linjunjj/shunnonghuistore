@@ -1,6 +1,8 @@
 <template>
+  <view class="container">
   <scroll-view scroll-x="true" class="scroll-view-x">
-    <tab @currentTab.user="getCurrentTab" :tabList.sync="tabList" :currentTab.sync="currentTab"></tab>
+    <span>asfasfasf</span>
+    <!--<tab @currentTab.user="getCurrentTab" :tabList.sync="tabList" :currentTab.sync="currentTab"></tab>-->
   </scroll-view>
   <scroll-view scroll-y="true" class="swiper-item-box" style="height:{{winHeight - 31}}px" bindscrolltolower="onReachBottom">
     <view class="fifler">
@@ -13,10 +15,12 @@
     <!--暂无数据显示-->
     <placeholder :show.sync="is_empty" message="暂无发现数据"></placeholder>
   </scroll-view>
+  </view>
 </template>
 <script>
 import wepy from 'wepy'
 import  Tab from  '../../components/tab'
+import ShopGridList from '../../components/shop_grid_list'
 import FilterBar from  '../../components/filter_bar'
 import BottomLoadMore from "../../components/common/bottomLoadMore"
 import Placeholder from "../../components/common/placeholder"

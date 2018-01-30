@@ -350,9 +350,9 @@ export default class OrderDetail extends wepy.page {
       text-align: center;
       margin: 0 auto;
       width: 180rpx;
-      -moz-border-radius: 10rpx;
+       -moz-border-radius: 10rpx;
       /* Firefox */
-      -webkit-border-radius: 10rpx;
+       -webkit-border-radius: 10rpx;
       /* Safari 和 Chrome */
       border-radius: 10rpx;
     }

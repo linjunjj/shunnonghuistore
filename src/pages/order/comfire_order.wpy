@@ -87,8 +87,8 @@ import {
   SYSTEM_INFO,
   USER_SPECICAL_INFO,
   ADDRESS_ID
-} from '../utils/constant';
-import swipeDelete from '../components/common/wepy-swipe-delete'
+} from '../../utils/constant';
+import swipeDelete from '../../components/common/wepy-swipe-delete'
 export default class ComfireOrder extends wepy.page {
   config = {
     navigationBarTitleText: '确认订单',
