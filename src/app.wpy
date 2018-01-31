@@ -22,16 +22,30 @@
   export default class extends wepy.app {
     config = {
       pages: [
+        'pages/home/home',
+        'pages/comment/comment_add',
+        'pages/compositeshop/compositesshop',
+        'pages/creditmall/creditmall',
+        'pages/goodsdetail/goodsdetail',
+        'pages/logistics/logistics',
         'pages/shop/shop',
         'pages/mainshop/mainshop',
-        // 'pages/apply/apply',
-        // 'pages/myorder/myorder',
-        // // 'pages/sign/sign',
-        // // 'pages/start/start',
-        // 'pages/creditmall/creditmall',
-        'pages/home/home',
+        'pages/myaddrss/myadress',
+        'pages/myaddress/add_address',
+        'pages/mycollection/mycollection',
+        'pages/mycoupons/mycoupons',
+        'pages/mycredit/more',
+        'pages/mycredit/mycredit',
+        'pages/myorder/order_detail',
+        'pages/apply/apply',
+        'pages/myorder/myorder',
+          'pages/order/comfire_order',
+        'pages/pay/pay_success',
+        'pages/shopcart/shopcart',
+        'pages/start/start',
         'pages/me/me',
-        'pages/sign/sign'
+        'pages/sign/sign',
+        'pages/vilage/vilage',
       ],
       window: {
         backgroundTextStyle: 'dark',
@@ -53,12 +67,12 @@
           "iconPath": "images/icon_home.png",
           "selectedIconPath": "images/icon_home_active.png"
         }, {
-          "pagePath": "pages/home/home",
+          "pagePath":'pages/creditmall/creditmall',
           "text": "积分商城",
           "iconPath": "images/icon_classify.png",
           "selectedIconPath": "images/icon_classify_active.png"
         }, {
-          "pagePath": "pages/home/home",
+          "pagePath": 'pages/shopcart/shopcart',
           "text": "购物车",
           "iconPath": "images/icon_shop_cart.png",
           "selectedIconPath": "images/icon_shop_cart_active.png"
