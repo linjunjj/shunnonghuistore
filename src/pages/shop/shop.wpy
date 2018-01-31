@@ -1,0 +1,52 @@
+<template>
+  <view>
+  <view style="width: 100%;display: flex; background-color: #d9d9d9;height: 100px">
+    <view style="margin-top: 10px;width: 30%;margin-left: 10px"  ><image src="http://oz4zfzmr0.bkt.clouddn.com/1511667541852fz85nk.jpg" style="width: 70px;height: 70px"/></view>
+    <view  style="width: 60%;"><view style="margin-top: 13px">
+      <span style="margin-top:150px;"><b>{{storedata.storename}}</b></span>
+      <view>
+        <span>店主:{{storedata.storer}}</span>
+      </view>
+      <view>
+        <span>联系电话:{{storedata.tel}}</span>
+      </view>
+      <view>
+         <span>
+           经营范围：{{storedata.scope}}
+         </span>
+      </view>
+    </view>
+    </view>
+  </view>
+  <scroll-view scroll-y="true" class="swiper-item-box" style="height:{{winHeight - 31}}px" bindscrolltolower="onReachBottom">
+    <shopGridList :purchasetype.sync="purchasetype" :list.sync="list"></shopGridList>
+    <!--加载更多时动画-->
+    <bottomLoadMore :show.sync="showLoading" message="正在加载"></bottomLoadMore>
+    <!--暂无数据显示-->
+    <placeholder :show.sync="is_empty" message="暂无待补货数据"></placeholder>
+  </scroll-view>
+
+  </view>
+</template>
+<script>
+  import  wepy  from  'wepy'
+  import ShopGridList from '../../components/shop_grid_list'
+  import BottomLoadMore from "../../components/common/bottomLoadMore"
+  import Placeholder from "../../components/common/placeholder"
+  export  default  class  shop extends  wepy.page {
+    config ={
+      navigationBarTitleText:"店铺"
+    }
+    components={
+      shopGridList: ShopGridList,
+      bottomLoadMore: BottomLoadMore,
+      placeholder: Placeholder
+    }
+
+
+
+  }
+</script>
+<style>
+
+</style>
